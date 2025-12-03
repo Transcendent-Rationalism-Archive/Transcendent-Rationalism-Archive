@@ -36,7 +36,22 @@ fi
 
 # 4. Пуш
 read -p "4. Выполнить git push (отправить изменения)? [y/N]: " -n 1 -r
-echo
+# 3. Коммит
+# Если сообщение передано как аргумент скрипта (./garden-helper.sh "сообщение"), используем его.
+if [ -n "$1" ]; then
+    commit_msg="$1"
+    echo "3. Использую переданное сообщение коммита: \"$commit_msg\""
+else
+    # Иначе запрашиваем у пользователя
+    read -p "3. Введите сообщение коммита: " commit_msg
+fi
+
+if [ -n "$commit_msg" ]; then
+    git commit -m "$commit_msg"
+else
+    echo "Сообщение коммита пустое. Коммит не создан."
+    exit 1
+fi
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     git push origin main
 fi
