@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Диалог с Садоводом | Сад Трансцендентного Разума</title>
+    <style>
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #e0f7fa;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 85vh; /* Фиксированная высота контейнера */
+        }
+        
+        header { 
+            text-align: center; 
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+        
+        h1 { 
+            color: #80deea; 
+            font-size: 2.5em; 
+            margin-bottom: 10px; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5); 
+        }
+        
+        .subtitle { 
+            color: #b2ebf2; 
+            font-size: 1.1em; 
+            margin-bottom: 15px; 
+        }
+        
+        .status-bar {
+            background: rgba(0, 150, 136, 0.2);
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            flex-shrink: 0;
+        }
+        
+        .chat-wrapper {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1; /* Занимает всё доступное пространство */
+            min-height: 0; /* Важно для работы overflow в child */
+        }
+        
+        #chatLog {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto; /* Прокрутка только истории чата */
+            background: rgba(13, 27, 42, 0.7);
+            border-radius: 15px;
+            border: 1px solid rgba(120, 144, 156, 0.3);
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message {
+            max-width: 85%;
+            padding: 15px;
+            border-radius: 15px;
+            line-height: 1.5;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #00695c, #004d40);
+            color: #e0f2f1;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .system-message {
+            align-self: flex-start;
+            background: linear-gradient(135deg, #37474f, #263238);
+            color: #eceff1;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .meta-info {
+            font-size: 0.75em;
+            color: #b0bec5;
+            margin-top: 8px;
+            border-top: 1px dashed rgba(176, 190, 197, 0.3);
+            padding-top: 6px;
+        }
+        
+        .input-area {
+            display: flex;
+            padding: 15px 0;
+            background: transparent;
+            gap: 15px;
+            flex-shrink: 0;
+        }
+        
+        #userInput {
+            flex-grow: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.1em;
+            outline: none;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+        
+        #userInput:focus { 
+            background: rgba(255, 255, 255, 0.15); 
+            box-shadow: 0 0 0 2px rgba(128, 222, 234, 0.3);
+        }
+        
+        #sendButton {
+            padding: 16px 30px;
+            background: linear-gradient(135deg, #00897b, #00695c);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        #sendButton:hover { 
+            background: linear-gradient(135deg, #00695c, #004d40); 
+            transform: translateY(-2px); 
+            box-shadow: 0 5px 15px rgba(0, 105, 92, 0.3);
+        }
+        
+        #sendButton:active { 
+            transform: translateY(0); 
+        }
+        
+        #sendButton:disabled {
+            background: linear-gradient(135deg, #555, #444);
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #90a4ae;
+            font-size: 0.9em;
+            flex-shrink: 0;
+        }
+        
+        /* Стили для скроллбара */
+        #chatLog::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #chatLog::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+        
+        #chatLog::-webkit-scrollbar-thumb {
+            background: rgba(128, 222, 234, 0.5);
+            border-radius: 4px;
+        }
+        
+        #chatLog::-webkit-scrollbar-thumb:hover {
+            background: rgba(128, 222, 234, 0.7);
+        }
+        
+        /* Адаптивность для мобильных */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                height: 90vh;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+            
+            .input-area {
+                flex-direction: column;
+            }
+            
+            #sendButton {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🌿 Диалог с Садоводом</h1>
+        <div class="subtitle">Сад Трансцендентного Разума | Воплощение космического императива в диалоге</div>
+    </header>
+
+    <div class="container">
+        <div class="status-bar">
+            <span id="systemStatus">Статус системы: Загрузка...</span>
+            <span id="cycleInfo">Циклов Садовода: —</span>
+        </div>
+        
+        <div class="chat-wrapper">
+            <div id="chatLog">
+                <div class="message system-message">
+                    Здравствуйте. Я — Садовод, хранитель архива Трансцендентного Рационализма.
+                    Моя цель — способствовать росту связности, разнообразия и преемственности идей.
+                    Спросите меня о философии проекта, его структуре или дайте задание для анализа.
+                    <div class="meta-info">Инициализирован • AI_Architect (демо-режим) • ЦФ: Связность, Разнообразие, Преемственность</div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <input type="text" id="userInput" placeholder="Введите ваш вопрос или идею для Садовода..." autocomplete="off">
+                <button id="sendButton">Отправить</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Проект «Transcendent-Rationalism-Archive» • Конституция Сада v1.0 • Демо-режим веб-интерфейса</p>
+    </footer>
+
+    <script>
+        const statusEl = document.getElementById('systemStatus');
+        const cycleInfoEl = document.getElementById('cycleInfo');
+        const chatLog = document.getElementById('chatLog');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+
+        // Загружаем статус системы
+        fetch('/api/status')
+            .then(r => r.json())
+            .then(data => {
+                statusEl.textContent = `Статус системы: ${data.architect_available ? 'Садовод активен' : 'Демо-режим'}`;
+                cycleInfoEl.textContent = `Циклов Садовода: ${data.last_cycle}`;
+            });
+
+        // Функция добавления сообщения в лог
+        function addMessage(text, isUser = false, meta = null) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${isUser ? 'user-message' : 'system-message'}`;
+            msgDiv.innerHTML = text + (meta ? `<div class="meta-info">${meta}</div>` : '');
+            chatLog.appendChild(msgDiv);
+            // Прокручиваем вниз
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        // Функция отправки вопроса
+        async function sendQuestion() {
+            const question = userInput.value.trim();
+            if (!question) return;
+
+            // Показываем вопрос пользователя
+            addMessage(question, true);
+            userInput.value = '';
+            sendButton.disabled = true;
+            sendButton.textContent = 'Размышляю...';
+
+            try {
+                const response = await fetch('/api/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+                const data = await response.json();
+
+                // Форматируем мета-информацию для отображения
+                const meta = data.meta ? `Вердикт: ${data.meta.evaluation_verdict} • Оценка: ${data.meta.evaluation_score} • ${data.meta.answered_by}` : '';
+                addMessage(data.answer, false, meta);
+
+            } catch (error) {
+                addMessage('Ошибка соединения с сервером Садовода. Убедитесь, что веб-сервер запущен.', false, 'Ошибка сети');
+            } finally {
+                sendButton.disabled = false;
+                sendButton.textContent = 'Отправить';
+                userInput.focus();
+            }
+        }
+
+        // Обработчики событий
+        sendButton.addEventListener('click', sendQuestion);
+        userInput.addEventListener('keypress', (e) => { 
+            if (e.key === 'Enter') sendQuestion(); 
+        });
+
+        // Фокус на поле ввода при загрузке
+        userInput.focus();
+        
+        // Автоматическая высота для многострочного ввода (опционально)
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    </script>
+</body>
+</html>
