@@ -30,7 +30,7 @@ Transcendent-Rationalism-Archive
 Теперь с проектом можно взаимодействовать через веб-интерфейс!
 
 ### Онлайн доступ:
-- **[Интерактивный диалог с Садоводом](https://ваш-логин.github.io/-Transcendent-Rationalism-Archive/)** (через GitHub Pages)
+- **[Интерактивный диалог с Садоводом](https://transcendent-rationalism-archive.github.io/Transcendent-Rationalism-Archive/)** (через GitHub Pages)
 
 ### Локальный запуск:
 Просто откройте файл `docs/index.html` в браузере.
