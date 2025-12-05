@@ -1,6 +1,5 @@
-# Основные зависимости для ИИ-Садовода
-
-# Для будущих расширений:
-# gitpython>=3.1.0
-# markdown>=3.0
-# python-frontmatter>=1.0.0
+unittest
+python-dotenv
+logging
+ast
+operator
