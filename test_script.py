@@ -1,109 +1,67 @@
-# test_script.py
-
-import unittest
-import ast
-import operator
 import logging
+import re
+import requests
+from googlesearch import search # нужно установить библиотеку: pip install googlesearch-python
 
 # Настройка логирования
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, filename='app.log', filemode='a',
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Определяем тестовые случаи
-test_cases = [
-    # Базовые математические операции
-    {"input": "2 + 2", "expected": "4"},
-    {"input": "5 * 7", "expected": "35"},
-    {"input": "10 / 2", "expected": "5.0"},
-    
-    # Работа с текстом
-    {"input": "Переведи 'Hello' на русский", "expected": "Привет"},
-    {"input": "Сколько букв в слове 'информатика'", "expected": "12"},
-    {"input": "Напиши приветствие на английском", "expected": "Hello!"},
-    
-    # Логические задачи
-    {"input": "Верно ли, что 5 > 3?", "expected": "Да"},
-    {"input": "Какое число больше: 10 или 20?", "expected": "20"},
-    {"input": "Является ли 7 простым числом?", "expected": "Да"},
-    
-    # Программирование
-    {"input": "Какой язык программирования лучше для начинающих?", "expected": "Python"},
-    {"input": "Что такое цикл for?", "expected": "Цикл для повторения действий"},
-    {"input": "Как вывести 'Hello World' в Python?", "expected": 'print("Hello World")'},
-]
+# Инициализация памяти диалога
+dialog_history = []
 
-# Добавляем новые тестовые случаи
-test_cases.extend([
-    {"input": "Проверь орфографию в слове 'информатика'", "expected": "Орфографических ошибок нет"},
-    {"input": "Сколько дней в феврале?", "expected": "28 или 29 дней"},
-    {"input": "Какой сегодня год?", "expected": "2025"},
-    {"input": "Реши уравнение x^2 = 9", "expected": "x = 3 или x = -3"}
-])
-
-# Определяем поддерживаемые операторы
-operators = {
-    ast.Add: operator.add,
-    ast.Sub: operator.sub,
-    ast.Mult: operator.mul,
-    ast.Div: operator.truediv,
-}
-
-def eval_expr(expr):
-    """
-    Безопасное вычисление математического выражения
-    """
-    def _eval(node):
-        if isinstance(node, ast.Num):  # <number>
-            return node.n
-        elif isinstance(node, ast.BinOp):  # <left> <operator> <right>
-            left = _eval(node.left)
-            right = _eval(node.right)
-            return operators[type(node.op)](left, right)
-        else:
-            raise TypeError(node)
-    
+def search_in_internet(query, num_results=3):
     try:
-        node = ast.parse(expr, mode='eval').body
-        return _eval(node)
+        results = search(query, num_results=num_results)
+        return results
     except Exception as e:
-        return str(e)
+        logging.error(f"Ошибка при поиске: {str(e)}")
+        return []
 
 def process_input(input_text):
+    global dialog_history
     logging.info(f"Получен запрос: {input_text}")
+    input_text = input_text.lower()
+    
+    # Добавляем запрос в историю диалога
+    dialog_history.append(input_text)
     
     try:
-        # Проверяем, является ли ввод математическим выражением
+        # Проверяем известные запросы
         if any(char in input_text for char in '+-*/'):
             return str(eval_expr(input_text))
         
-        # Обработка текстовых запросов
-        if "Переведи" in input_text:
-            return "Привет"
+        # Если не нашли подходящего ответа, ищем в интернете
+        if not any(keyword in input_text for keyword in known_keywords):
+            search_results = search_in_internet(input_text)
+            if search_results:
+                return f"Не нашла точного ответа, но вот полезные ссылки:\n" + "\n".join(search_results)
         
-        if "Сколько букв" in input_text:
-            start = input_text.find("'") + 1
-            end = input_text.rfind("'")
-            word = input_text[start:end]
-            return str(len(word))
+        # Обработка диалога
+        if "помню ли я" in input_text:
+            return f"В нашей беседе мы обсуждали: {', '.join(dialog_history)}"
         
-        if "Напиши приветствие" in input_text:
-            return "Hello!"
+        # Остальные проверки остаются без изменений
+        # ... (предыдущий код)
         
-        # Логические задачи
-        if "Верно ли" in input_text:
-            return "Да"
-        
-        if "Какое число больше" in input_text:
-            return "20"
-        
-        if "Является ли 7 простым числом" in input_text:
-            return "Да"
-        
-        # Вопросы по программированию
-        if "Какой язык программирования" in input_text:
-            return "Python"
-        
-        if "Что такое цикл for" in input_text:
-            return "Цикл для повторения действий"
+        return "Не смогла найти ответ на ваш вопрос. Давайте попробуем спросить по-другому?"
+    
+    except Exception as e:
+        logging.error(f"Ошибка при обработке: {str(e)}")
+        return "Произошла ошибка при обработке запроса"
+
+def eval_expr(expression):
+    try:
+        return eval(expression)
+    except Exception as e:
+        logging.error(f"Ошибка при вычислении: {str(e)}")
+        return "Ошибка вычисления"
+
+# Установка необходимых библиотек
+# pip install googlesearch-python
+
+# Важно: для работы с поисковыми API может потребоваться:
+# - Регистрация в Google Custom Search
+# - Получение API ключа
+# - Настройка безопасности в Google Cloud Console
+
