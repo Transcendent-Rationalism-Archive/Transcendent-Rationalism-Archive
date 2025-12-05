@@ -1,1 +1,5 @@
 *.bundle
+__pycache__/
+*.log
+myenv-python38/
+myenv*/
