@@ -105,4 +105,5 @@ def process_input(input_text):
         if "Какой язык программирования" in input_text:
             return "Python"
         
-        if "Что такое цикл for" in input_text
+        if "Что такое цикл for" in input_text:
+            return "Цикл для повторения действий"
